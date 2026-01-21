@@ -24,6 +24,6 @@ vendor/
 .DS_Store
 
 # Project Specific
-jtg
+/jtg
 .env
 *.xlsx
