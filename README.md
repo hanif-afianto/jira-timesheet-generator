@@ -60,3 +60,4 @@ jtg -a hanif -p 01-2026
 
 > [!TIP]
 > Your generated reports are automatically saved to your system's `Downloads` folder for easy access.
+ 
