@@ -88,3 +88,56 @@ func (m *PathManager) addToPathUnix(binDir string) error {
 
 	return nil
 }
+func (m *PathManager) SetupConfig() error {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return fmt.Errorf("failed to get home directory: %w", err)
+	}
+
+	var configDir string
+	if runtime.GOOS == "windows" {
+		if appData := os.Getenv("APPDATA"); appData != "" {
+			configDir = filepath.Join(appData, "jtg")
+		} else {
+			configDir = filepath.Join(homeDir, ".jtg")
+		}
+	} else {
+		configDir = filepath.Join(homeDir, ".jtg")
+	}
+
+	// 1. Create directory
+	if err := os.MkdirAll(configDir, 0755); err != nil {
+		return fmt.Errorf("failed to create config directory: %w", err)
+	}
+
+	targetEnv := filepath.Join(configDir, ".env")
+	if _, err := os.Stat(targetEnv); err == nil {
+		fmt.Printf("Config file already exists at %s\n", targetEnv)
+		return nil
+	}
+
+	// 2. Find and copy .env.example
+	// Check current directory first, then executable directory
+	exampleFile := ".env.example"
+	if _, err := os.Stat(exampleFile); err != nil {
+		exePath, _ := os.Executable()
+		exampleFile = filepath.Join(filepath.Dir(exePath), ".env.example")
+		if _, err := os.Stat(exampleFile); err != nil {
+			return fmt.Errorf("could not find .env.example in current directory or executable directory")
+		}
+	}
+
+	input, err := os.ReadFile(exampleFile)
+	if err != nil {
+		return fmt.Errorf("failed to read %s: %w", exampleFile, err)
+	}
+
+	if err := os.WriteFile(targetEnv, input, 0644); err != nil {
+		return fmt.Errorf("failed to write %s: %w", targetEnv, err)
+	}
+
+	fmt.Printf("Successfully created configuration at %s\n", targetEnv)
+	fmt.Println("Please edit this file with your Jira credentials.")
+
+	return nil
+}

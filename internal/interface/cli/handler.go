@@ -23,11 +23,19 @@ func NewCLIHandler(u *timesheet.GenerateTimesheetUsecase, e *excel.ExcelExporter
 }
 
 func (h *CLIHandler) Handle(args []string) {
-	if len(args) > 0 && args[0] == "install" {
-		if err := h.pathManager.AddToPath(); err != nil {
-			fmt.Printf("Error during installation: %v\n", err)
+	if len(args) > 0 {
+		switch args[0] {
+		case "install":
+			if err := h.pathManager.AddToPath(); err != nil {
+				fmt.Printf("Error during installation: %v\n", err)
+			}
+			return
+		case "setup-config":
+			if err := h.pathManager.SetupConfig(); err != nil {
+				fmt.Printf("Error during configuration setup: %v\n", err)
+			}
+			return
 		}
-		return
 	}
 
 	fs := flag.NewFlagSet("jtg", flag.ExitOnError)
@@ -39,6 +47,7 @@ func (h *CLIHandler) Handle(args []string) {
 		fmt.Println("Usage:")
 		fmt.Println("  jtg -a <actor> -p <period>  (Generate timesheet)")
 		fmt.Println("  jtg install                 (Add jtg to system PATH)")
+		fmt.Println("  jtg setup-config            (Initialize global configuration)")
 		return
 	}
 
