@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	_ "time/tzdata"
 
 	"github.com/hanif-afianto/jira-timesheet-generator/internal/infrastructure/config"
 	"github.com/hanif-afianto/jira-timesheet-generator/internal/infrastructure/excel"

@@ -72,7 +72,12 @@ func (u *GenerateTimesheetUsecase) Execute(ctx context.Context, actor, userID, p
 }
 
 func (u *GenerateTimesheetUsecase) getCutoffDates(period string) (time.Time, time.Time, error) {
-	loc, _ := time.LoadLocation("Asia/Jakarta")
+	loc, err := time.LoadLocation("Asia/Jakarta")
+	if err != nil {
+		// Fallback to local time if timezone database is having issues
+		loc = time.Local
+	}
+
 	t, err := time.ParseInLocation("01-2006", period, loc)
 	if err != nil {
 		return time.Time{}, time.Time{}, fmt.Errorf("invalid period format")
