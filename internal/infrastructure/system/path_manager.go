@@ -88,6 +88,14 @@ func (m *PathManager) addToPathUnix(binDir string) error {
 
 	return nil
 }
+const defaultEnvContent = `JIRA_BASE_URL=https://your-domain.atlassian.net
+JIRA_EMAIL=your-email@domain.com
+JIRA_API_TOKEN=your-api-token
+
+# User Mapping (Add your team's account IDs)
+USER_ID_HANIF=your-jira-account-id
+`
+
 func (m *PathManager) SetupConfig() error {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
@@ -116,24 +124,9 @@ func (m *PathManager) SetupConfig() error {
 		return nil
 	}
 
-	// 2. Find and copy .env.example
-	// Check current directory first, then executable directory
-	exampleFile := ".env.example"
-	if _, err := os.Stat(exampleFile); err != nil {
-		exePath, _ := os.Executable()
-		exampleFile = filepath.Join(filepath.Dir(exePath), ".env.example")
-		if _, err := os.Stat(exampleFile); err != nil {
-			return fmt.Errorf("could not find .env.example in current directory or executable directory")
-		}
-	}
-
-	input, err := os.ReadFile(exampleFile)
-	if err != nil {
-		return fmt.Errorf("failed to read %s: %w", exampleFile, err)
-	}
-
-	if err := os.WriteFile(targetEnv, input, 0644); err != nil {
-		return fmt.Errorf("failed to write %s: %w", targetEnv, err)
+	// 2. Initialize .env using embedded template
+	if err := os.WriteFile(targetEnv, []byte(defaultEnvContent), 0644); err != nil {
+		return fmt.Errorf("failed to initialize %s: %w", targetEnv, err)
 	}
 
 	fmt.Printf("Successfully created configuration at %s\n", targetEnv)
